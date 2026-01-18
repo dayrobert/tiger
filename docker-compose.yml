@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mysql9:
+    image: mysql:9.1
+    container_name: mysql9
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql9_data:/var/lib/mysql
+
+volumes:
+  mysql9_data:
+    driver: local

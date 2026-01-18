@@ -1,0 +1,27 @@
+{
+  "name": "tiger",
+  "version": "0.1.0",
+  "description": "eBay purchase tracker (Electron + TypeScript + MySQL)",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc && mkdir -p dist/db dist/renderer && cp src/db/*.sql dist/db/ && cp src/renderer/*.html dist/renderer/",
+    "start": "npm run build && electron .",
+    "start:dev": "npm run build && NODE_ENV=development electron .",
+    "dev": "tsc -w",
+    "check-prices": "ts-node src/scripts/priceChecker.ts",
+    "migrate": "ts-node src/db/migrate.ts"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "dotenv": "^17.2.3",
+    "electron-log": "^5.4.3",
+    "electron-store": "^8.1.0",
+    "mysql2": "^3.3.0",
+    "node-cron": "^3.0.2"
+  },
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
