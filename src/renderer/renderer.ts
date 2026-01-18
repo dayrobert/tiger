@@ -113,18 +113,23 @@ function escapeHtml(text: string): string {
 async function loadItems() {
   if (!app) return
   
-  window.electronAPI.log.debug('Loading items...')
-  const result = await window.electronAPI.item.list()
-  
-  if (!result.success) {
-    window.electronAPI.log.error('Failed to load items:', result.error)
-    app.innerHTML = `<div class="empty-state">Error loading items: ${result.error}</div>`
-    return
+  try {
+    window.electronAPI.log.debug('Loading items...')
+    const result = await window.electronAPI.item.list()
+    
+    if (!result.success) {
+      window.electronAPI.log.error('Failed to load items:', result.error)
+      app.innerHTML = `<div class="empty-state">Error loading items: ${result.error}</div>`
+      return
+    }
+    
+    currentItems = result.items || []
+    window.electronAPI.log.info(`Loaded ${currentItems.length} items`)
+    renderItems(currentItems)
+  } catch (error: any) {
+    window.electronAPI.log.error('Exception loading items:', error)
+    app.innerHTML = `<div class="empty-state">Error loading items: ${error.message}</div>`
   }
-  
-  currentItems = result.items || []
-  window.electronAPI.log.info(`Loaded ${currentItems.length} items`)
-  renderItems(currentItems)
 }
 
 async function showItemDetails(id: string | null) {
@@ -358,6 +363,13 @@ async function handleAddItem(event: Event) {
 
 async function initialize() {
   if (!app) return
+
+  // Check if electronAPI is available
+  if (typeof window.electronAPI === 'undefined') {
+    app.innerHTML = `<div class="empty-state">Error: Electron API not loaded. Please restart the application.</div>`
+    console.error('window.electronAPI is undefined - preload script may have failed to load')
+    return
+  }
 
   window.electronAPI.log.info('Initializing renderer...')
 
