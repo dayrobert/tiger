@@ -23,3 +23,8 @@ CREATE TABLE IF NOT EXISTS purchases (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
+
+-- Create application user and grant privileges
+CREATE USER IF NOT EXISTS 'tiger_admin'@'%' IDENTIFIED BY 'tiger_password';
+GRANT ALL PRIVILEGES ON tiger.* TO 'tiger_admin'@'%';
+FLUSH PRIVILEGES;

@@ -45,6 +45,7 @@ Desktop.ini
 *.launch
 .settings/
 *.sublime-workspace
+package-lock.json
 
 # Electron
 electron-builder.yml

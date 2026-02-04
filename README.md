@@ -12,17 +12,13 @@ cd ~/Projects/tiger
 npm install
 ```
 
-2. Configure environment (create a `.env` file or export env vars)
+2. Install docker containers by running
+```bash
+docker compose up
+```
 
-```
-DB_HOST=192.168.1.100
-DB_USER=myuser
-DB_PASSWORD=secret
-DB_NAME=tiger
-EBAY_CLIENT_ID=your-ebay-client-id
-EBAY_CLIENT_SECRET=your-ebay-client-secret
-EBAY_TOKEN=your-ebay-oauth-token
-```
+3. Configure the database by running the db/schema.sql script within a mysql console.
+
 
 To get your eBay API credentials:
 1. Go to https://developer.ebay.com/

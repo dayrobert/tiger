@@ -18,9 +18,9 @@ export interface AppSettings {
 const defaults: AppSettings = {
   database: {
     host: '127.0.0.1',
-    port: 3306,
-    user: 'root',
-    password: '',
+    port: 3308,
+    user: 'tiger_admin',
+    password: 'tiger_password',
     database: 'tiger'
   },
   ebay: {
