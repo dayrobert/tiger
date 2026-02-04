@@ -221,9 +221,115 @@
         color: #28a745;
         font-weight: bold;
       }
+      
+      /* Search toolbar */
+      .search-toolbar {
+        padding: 15px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      
+      .search-toolbar input {
+        flex: 1;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      
+      .search-toolbar button {
+        margin: 0;
+        padding: 8px 20px;
+      }
+      
+      .search-toolbar .btn-secondary {
+        background: #6c757d;
+      }
+      
+      .search-toolbar .btn-secondary:hover {
+        background: #5a6268;
+      }
+      
+      /* Search results */
+      .search-results {
+        display: none;
+        background: white;
+        border-bottom: 2px solid #ddd;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      
+      .search-results.active {
+        display: block;
+      }
+      
+      .search-result-item {
+        display: flex;
+        gap: 15px;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      
+      .search-result-item:hover {
+        background: #f8f9fa;
+      }
+      
+      .search-result-image {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      
+      .search-result-info {
+        flex: 1;
+      }
+      
+      .search-result-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #0064d2;
+      }
+      
+      .search-result-price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+      }
+      
+      .search-result-condition {
+        font-size: 13px;
+        color: #666;
+      }
+      
+      .search-loading {
+        padding: 30px;
+        text-align: center;
+        color: #999;
+      }
+      
+      .search-error {
+        padding: 20px;
+        text-align: center;
+        color: #d32f2f;
+        background: #ffebee;
+      }
     </style>
   </head>
   <body>
+    <div class="search-toolbar" id="searchToolbar" style="display: none;">
+      <input type="text" id="searchInput" placeholder="Search eBay for items...">
+      <button id="searchBtn">Search</button>
+      <button class="btn-secondary" id="clearSearchBtn">Clear</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
     <div id="app">Loading...</div>
     <div class="status-bar">
       <div class="status-item" id="ebayStatus">

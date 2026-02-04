@@ -10,9 +10,7 @@ build/
 out/
 
 # Environment variables - Keep .env files out of version control
-.env
 .env.local
-.env.dev
 .env.production
 .env.*.local
 *.local

@@ -3,6 +3,7 @@ export interface ElectronAPI {
   ebay: {
     connect: () => Promise<{ success: boolean; token?: string; error?: string }>
     checkConnection: () => Promise<{ connected: boolean }>
+    search: (searchParams: any) => Promise<{ success: boolean; results?: any[]; error?: string }>
   }
   item: {
     create: (data: any) => Promise<{ success: boolean; itemId?: number; error?: string }>

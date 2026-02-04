@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, Menu } from 'electron'
 import path from 'path'
 import { initDb, createPool } from './db'
 import { EbayAuthManager } from './ebay/auth'
+import { EbaySearchService } from './ebay/search'
 import { createItemFull, CreateItemData } from './models'
 import { getSettings, updateSettings, AppSettings } from './settings'
 import { logger } from './logger'
@@ -171,6 +172,29 @@ ipcMain.handle('ebay:check-connection', async () => {
   const connected = !!ebaySettings.token && ebaySettings.token !== ''
   logger.debug('eBay connection status checked:', connected)
   return { connected }
+})
+
+// IPC Handler for searching eBay
+ipcMain.handle('ebay:search', async (event, searchParams) => {
+  logger.info('eBay search requested:', searchParams.keywords)
+  
+  const ebaySettings = getSettings().ebay
+
+  if (!ebaySettings.clientId || !ebaySettings.clientSecret) {
+    logger.error('eBay credentials not configured')
+    return { success: false, error: 'eBay credentials not configured. Please set them in Preferences.' }
+  }
+
+  const searchService = new EbaySearchService(ebaySettings.clientId, ebaySettings.clientSecret)
+  
+  try {
+    const results = await searchService.search(searchParams)
+    logger.info(`eBay search successful: ${results.length} items found`)
+    return { success: true, results }
+  } catch (error: any) {
+    logger.error('eBay search failed:', error.message)
+    return { success: false, error: error.message }
+  }
 })
 
 // IPC Handler for creating items

@@ -7,7 +7,8 @@ try {
     invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
     ebay: {
       connect: () => ipcRenderer.invoke('ebay:connect'),
-      checkConnection: () => ipcRenderer.invoke('ebay:check-connection')
+      checkConnection: () => ipcRenderer.invoke('ebay:check-connection'),
+      search: (searchParams: any) => ipcRenderer.invoke('ebay:search', searchParams)
     },
     item: {
       create: (data: any) => ipcRenderer.invoke('item:create', data),

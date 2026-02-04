@@ -319,7 +319,7 @@ async function handleAddItem(event: Event) {
   const form = event.target as HTMLFormElement
   const formData = new FormData(form)
   
-  const data = {
+  const data: any = {
     title: formData.get('title') as string,
     description: formData.get('description') as string,
     purchasePrice: formData.get('purchasePrice') ? parseFloat(formData.get('purchasePrice') as string) : undefined,
@@ -327,6 +327,11 @@ async function handleAddItem(event: Event) {
     condition: formData.get('condition') as string || undefined,
     shippingCost: formData.get('shippingCost') ? parseFloat(formData.get('shippingCost') as string) : undefined,
     notes: formData.get('notes') as string
+  }
+  
+  // Include eBay item ID if present
+  if (formData.get('ebayItemId')) {
+    data.ebayItemId = formData.get('ebayItemId') as string
   }
   
   window.electronAPI.log.info('Creating new item:', data.title)
@@ -358,6 +363,106 @@ async function handleAddItem(event: Event) {
       submitBtn.disabled = false
       submitBtn.textContent = 'Add Item'
     }
+  }
+}
+
+// eBay Search Functions
+async function performEbaySearch(keywords: string) {
+  const searchResults = document.getElementById('searchResults')
+  if (!searchResults) return
+  
+  searchResults.classList.add('active')
+  searchResults.innerHTML = '<div class="search-loading">Searching eBay...</div>'
+  
+  try {
+    window.electronAPI.log.info('Searching eBay for:', keywords)
+    const result = await window.electronAPI.ebay.search({ keywords, limit: 50 })
+    
+    if (!result.success) {
+      searchResults.innerHTML = `<div class="search-error">Error: ${result.error}</div>`
+      return
+    }
+    
+    if (!result.results || result.results.length === 0) {
+      searchResults.innerHTML = '<div class="empty-state">No results found</div>'
+      return
+    }
+    
+    renderSearchResults(result.results)
+  } catch (error: any) {
+    window.electronAPI.log.error('Search error:', error)
+    searchResults.innerHTML = `<div class="search-error">Error: ${error.message}</div>`
+  }
+}
+
+function renderSearchResults(results: any[]) {
+  const searchResults = document.getElementById('searchResults')
+  if (!searchResults) return
+  
+  const html = results.map(item => `
+    <div class="search-result-item" data-item='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+      ${item.image?.imageUrl ? `<img src="${item.image.imageUrl}" class="search-result-image" alt="${escapeHtml(item.title)}">` : '<div class="search-result-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999;">No image</div>'}
+      <div class="search-result-info">
+        <div class="search-result-title">${escapeHtml(item.title)}</div>
+        ${item.price ? `<div class="search-result-price">${item.price.currency} $${item.price.value}</div>` : ''}
+        ${item.condition ? `<div class="search-result-condition">Condition: ${item.condition}</div>` : ''}
+      </div>
+    </div>
+  `).join('')
+  
+  searchResults.innerHTML = html
+  
+  // Add click handlers
+  searchResults.querySelectorAll('.search-result-item').forEach(elem => {
+    elem.addEventListener('click', () => {
+      const itemData = JSON.parse(elem.getAttribute('data-item') || '{}')
+      importEbayItem(itemData)
+    })
+  })
+}
+
+function importEbayItem(ebayItem: any) {
+  window.electronAPI.log.info('Importing eBay item:', ebayItem.title)
+  
+  // Show add item dialog pre-filled with eBay data
+  showAddItemDialog()
+  
+  const form = document.getElementById('addItemForm') as HTMLFormElement
+  if (form) {
+    (form.elements.namedItem('title') as HTMLInputElement).value = ebayItem.title || ''
+    
+    if (ebayItem.price?.value) {
+      (form.elements.namedItem('purchasePrice') as HTMLInputElement).value = ebayItem.price.value
+    }
+    
+    // Store eBay item ID in a hidden field or data attribute
+    const ebayIdField = document.createElement('input')
+    ebayIdField.type = 'hidden'
+    ebayIdField.name = 'ebayItemId'
+    ebayIdField.value = ebayItem.itemId
+    
+    // Remove any existing hidden ebayItemId field first
+    const existing = form.querySelector('input[name="ebayItemId"]')
+    if (existing) existing.remove()
+    
+    form.appendChild(ebayIdField)
+  }
+  
+  // Clear search results
+  clearSearch()
+}
+
+function clearSearch() {
+  const searchResults = document.getElementById('searchResults')
+  const searchInput = document.getElementById('searchInput') as HTMLInputElement
+  
+  if (searchResults) {
+    searchResults.classList.remove('active')
+    searchResults.innerHTML = ''
+  }
+  
+  if (searchInput) {
+    searchInput.value = ''
   }
 }
 
@@ -610,6 +715,38 @@ async function initialize() {
   
   if (prefCancelBtn) {
     prefCancelBtn.addEventListener('click', hidePreferences)
+  }
+  
+  // Search toolbar event listeners
+  const searchToolbar = document.getElementById('searchToolbar')
+  const searchInput = document.getElementById('searchInput') as HTMLInputElement
+  const searchBtn = document.getElementById('searchBtn')
+  const clearSearchBtn = document.getElementById('clearSearchBtn')
+  
+  if (searchToolbar) {
+    searchToolbar.style.display = 'flex'
+  }
+  
+  if (searchBtn && searchInput) {
+    searchBtn.addEventListener('click', () => {
+      const keywords = searchInput.value.trim()
+      if (keywords) {
+        performEbaySearch(keywords)
+      }
+    })
+    
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const keywords = searchInput.value.trim()
+        if (keywords) {
+          performEbaySearch(keywords)
+        }
+      }
+    })
+  }
+  
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', clearSearch)
   }
   
   // Listen for menu item triggers
